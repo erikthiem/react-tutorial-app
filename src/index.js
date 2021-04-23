@@ -81,6 +81,7 @@ class Game extends React.Component {
     });
   }
 
+
   render() {
     const history = this.state.history;
     const current = history[this.state.stepNumber];
@@ -91,9 +92,10 @@ class Game extends React.Component {
       const desc = move ?
         generateMoveText(move, step.clickedIndex) :
         'Go to game start';
+
       return (
         <li key={move}>
-          <button onClick={() =>
+          <button className={move === this.state.stepNumber ? 'current-step' : null} onClick={() =>
           this.jumpTo(move)}>{desc}</button>
         </li>
       );
