@@ -67,6 +67,7 @@ class Game extends React.Component {
     this.setState({
       history: history.concat([{
         squares: squares,
+        clickedIndex: i,
       }]),
       stepNumber: history.length,
       xIsNext: !this.state.xIsNext,
@@ -86,8 +87,9 @@ class Game extends React.Component {
     const winner = calculateWinner(current.squares);
 
     const moves = history.map((step, move) => {
+
       const desc = move ?
-        'Go to move #' + move :
+        generateMoveText(move, step.clickedIndex) :
         'Go to game start';
       return (
         <li key={move}>
@@ -147,4 +149,20 @@ function calculateWinner(squares) {
     }
   }
   return null;
+}
+
+// Returns {row, column} of index given a square width x width grid
+// and walking through the grid left-to-right, top-to-bottom
+// Uses more-human-friendly, 1-indexed values
+function locationOfIndex(index, width) {
+  let row = parseInt(index / width) + 1;
+  let column = (index % width) + 1;
+  return {row: row, column: column};
+}
+
+function generateMoveText(move, clickedIndex) {
+  const location = move ? locationOfIndex(clickedIndex, 3) : false;
+  const row = location.row;
+  const column = location.column;
+  return `Go to move #${move} (row: ${row}, column: ${column})`
 }
