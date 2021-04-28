@@ -4,7 +4,7 @@ import './index.css';
 
 function Square(props) {
   return (
-    <button className="square"
+    <button className={`square ${props.isWinningSquare ? 'winning-square' : null}`}
             onClick={props.onClick}>
       {props.value}
     </button>
@@ -12,20 +12,25 @@ function Square(props) {
 }
 
 class Board extends React.Component {
-  renderSquare(i) {
+  renderSquare(i, winning_squares) {
+    let is_winning_square = false;
+    if (winning_squares.includes(i)) {
+        is_winning_square = true;
+    }
     return (
       <Square
         key={i}
+        isWinningSquare={is_winning_square}
         value={this.props.squares[i]}
         onClick={() => this.props.onClick(i)}
       />
     );
   }
 
-  renderRow(min, max) {
+  renderRow(min, max, winning_squares) {
     let squares = []
     for (let i = min; i <= max; i++) {
-      squares = squares.concat(this.renderSquare(i));
+      squares = squares.concat(this.renderSquare(i, winning_squares));
     }
     return (
       <div className="board-row">
@@ -37,9 +42,9 @@ class Board extends React.Component {
   render() {
     return (
       <div>
-        {this.renderRow(0, 2)}
-        {this.renderRow(3, 5)}
-        {this.renderRow(6, 8)}
+        {this.renderRow(0, 2, this.props.winning_squares)}
+        {this.renderRow(3, 5, this.props.winning_squares)}
+        {this.renderRow(6, 8, this.props.winning_squares)}
       </div>
     );
   }
@@ -99,7 +104,9 @@ class Game extends React.Component {
     const history = this.state.history.slice(0, this.state.stepNumber + 1);
     const current = history[history.length - 1];
     const squares = current.squares.slice();
-    if (calculateWinner(squares) || squares[i]) {
+    const winning_info = calculateWinner(squares);
+
+    if (winning_info.winner || squares[i]) {
       return;
     }
     squares[i] = this.state.xIsNext ? 'X' : 'O';
@@ -128,7 +135,8 @@ class Game extends React.Component {
   render() {
     const history = this.state.history;
     const current = history[this.state.stepNumber];
-    const winner = calculateWinner(current.squares);
+    const winning_info = calculateWinner(current.squares);
+    const winner = winning_info.winner;
 
     let moves = history.map((step, move) => {
 
@@ -149,11 +157,14 @@ class Game extends React.Component {
     }
 
     let status;
+    let winning_squares;
     if (winner) {
       status = 'Winner: ' + winner;
+      winning_squares = winning_info.winning_squares;
     } else {
       status = 'Next player: ' +
 (this.state.xIsNext ? 'X' : 'O');
+      winning_squares = [];
     }
 
     return (
@@ -161,6 +172,7 @@ class Game extends React.Component {
         <div className="game-board">
           <Board
             squares={current.squares}
+            winning_squares={winning_squares}
             onClick={(i) => this.handleClick(i)}
           />
         </div>
@@ -197,10 +209,10 @@ function calculateWinner(squares) {
   for (let i = 0; i < lines.length; i++) {
     const [a, b, c] = lines[i];
     if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-      return squares[a];
+      return { winner: squares[a], winning_squares: [a, b, c] }
     }
   }
-  return null;
+  return { winner: null, winning_squares: [] };
 }
 
 // Returns {row, column} of index given a square width x width grid
