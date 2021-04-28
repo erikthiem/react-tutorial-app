@@ -45,6 +45,43 @@ class Board extends React.Component {
   }
 }
 
+class OrderToggle extends React.Component {
+  constructor(props) {
+    super(props);
+    this.handleChange = this.handleChange.bind(this);
+  }
+
+  handleChange(e) {
+    this.props.onOrderChange(e.target.value);
+  }
+
+  render() {
+    return (
+      <div>
+        <p>Move order:
+        <input type="radio"
+               id="descending"
+               name="order"
+               value="descending"
+               onChange={this.handleChange}
+               checked={this.props.descending}
+        />
+        <label htmlFor="descending">Descending</label>
+        <input type="radio"
+               id="ascending"
+               name="order"
+               value="ascending"
+               onChange={this.handleChange}
+               checked={!this.props.descending}
+        />
+        <label htmlFor="ascending">Ascending</label>
+        </p>
+      </div>
+    );
+  }
+}
+
+
 class Game extends React.Component {
   constructor(props) {
     super(props);
@@ -54,6 +91,7 @@ class Game extends React.Component {
       }],
       stepNumber: 0,
       xIsNext: true,
+      descending: true,
     }
   }
 
@@ -75,6 +113,11 @@ class Game extends React.Component {
     })
   }
 
+  handleOrderChange(order) {
+    const descending = (order === 'descending');
+    this.setState({descending: descending})
+  }
+
   jumpTo(step) {
     this.setState({
       stepNumber: step,
@@ -82,13 +125,12 @@ class Game extends React.Component {
     });
   }
 
-
   render() {
     const history = this.state.history;
     const current = history[this.state.stepNumber];
     const winner = calculateWinner(current.squares);
 
-    const moves = history.map((step, move) => {
+    let moves = history.map((step, move) => {
 
       const desc = move ?
         generateMoveText(move, step.clickedIndex) :
@@ -101,6 +143,10 @@ class Game extends React.Component {
         </li>
       );
     });
+
+    if (!this.state.descending) {
+      moves = moves.reverse();
+    }
 
     let status;
     if (winner) {
@@ -120,6 +166,9 @@ class Game extends React.Component {
         </div>
         <div className="game-info">
           <div>{status}</div>
+          <OrderToggle descending={this.state.descending}
+                       onOrderChange={(order) => this.handleOrderChange(order)}
+          />
           <ol>{moves}</ol>
         </div>
       </div>
