@@ -137,6 +137,7 @@ class Game extends React.Component {
     const current = history[this.state.stepNumber];
     const winning_info = calculateWinner(current.squares);
     const winner = winning_info.winner;
+    const tie = !winner && !current.squares.includes(null);
 
     let moves = history.map((step, move) => {
 
@@ -161,6 +162,9 @@ class Game extends React.Component {
     if (winner) {
       status = 'Winner: ' + winner;
       winning_squares = winning_info.winning_squares;
+    } else if (tie) {
+      status = 'Game ended in a draw';
+      winning_squares = [];
     } else {
       status = 'Next player: ' +
 (this.state.xIsNext ? 'X' : 'O');
